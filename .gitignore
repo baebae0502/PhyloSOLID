@@ -1,0 +1,45 @@
+# Large binary files
+*.bam
+*.bam.bai
+*.bai
+*.fastq
+*.fq
+*.fastq.gz
+*.fq.gz
+*.vcf
+*.vcf.gz
+
+# Output directories
+/output/
+/work/
+/temp/
+*.log
+*_features/
+*_treeinput/
+*_tree_building/
+*_results/
+
+# Demo data (keep only small test files)
+demo/input/*/01_rawdata/*.bam
+demo/input/*/01_rawdata/*.bam.bai
+
+# Config with local paths
+config/paths.yaml
+!config/paths.yaml.template
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.so
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
