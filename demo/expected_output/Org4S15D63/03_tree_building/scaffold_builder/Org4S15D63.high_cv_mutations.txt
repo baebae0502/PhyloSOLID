@@ -1,0 +1,4 @@
+High CV Mutations (excluded from analysis)
+==================================================
+
+chr2_3576510_G_A
