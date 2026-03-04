@@ -1,0 +1,23 @@
+# config/paths.yaml
+# External tool paths - users need to set these according to their installation
+
+# Conda environment (required for Python scripts)
+conda:
+  python: "/home/douyanmeiLab/yangqing/Conda/envs/pmg/bin/python"  # Path to conda Python interpreter
+  env_path: "/home/douyanmeiLab/yangqing/Conda/envs/pmg"           # Path to conda environment
+
+# ANNOVAR (required for variant annotation)
+# Please install ANNOVAR from http://www.openbioinformatics.org/annovar/
+annovar:
+  script_dir: "/storage/douyanmeiLab/yangzhirui/00.Softwares/annovar"       # Directory containing annotate_variation.pl
+  humandb: "/storage/douyanmeiLab/yangzhirui/00.Softwares/annovar/humandb"  # Directory containing downloaded databases
+  build: "hg38"                                                              # Genome build (hg38/hg19)
+
+# Other reference files (paths need to be updated by user)
+reference:
+  genome_fasta: "/storage/douyanmeiLab/yangzhirui/Reference/Cellranger/refdata-gex-GRCh38-2020-A/fasta/genome.fa"
+  gff3_file: "/storage/douyanmeiLab/yangzhirui/Reference/wgEncodeGencodeExonSupportV44.sort.bed"
+  mappability_file: "/storage/douyanmeiLab/yangzhirui/Reference/MapScore_umap_multiRead/k24.umap.bedgraph"
+  gnomad_file: "/storage/douyanmeiLab/yangzhirui/Reference/resource/hg38_gnomad312_genome_only_af_all.txt"
+  rna_editing_file: "/storage/douyanmeiLab/yangzhirui/Reference/COMBINED_RADAR_REDIprotal_DARNED_hg38_all_sites.bed"
+
