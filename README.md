@@ -2,6 +2,11 @@
 
 Tree building from single-cell sequencing data (scRNA-seq and scDNA-seq)
 
+
+> **Important Note for Users**:
+> PhyloSOLID is under active development, especially during its preprint stage. The software and its associated resources are continuously being updated and improved. If you encounter any issues, have feature requests, or need guidance, **please do not hesitate to contact us**. We are committed to providing timely support and would greatly appreciate your feedback to make PhyloSOLID better for the entire community. You can reach us at the emails provided in the Contact section.
+
+
 ## Overview
 
 PhyloSOLID is a comprehensive pipeline for building phylogenetic trees from single-cell sequencing data. It supports both scRNA-seq and scDNA-seq modes, with features for mutation filtering, tree construction, and visualization.
@@ -36,10 +41,7 @@ pip install -e .
 
 ##### PhyloSOLID uses ANNOVAR for variant annotation. You need to install it separately:
 
-1. Register and download ANNOVAR:
-	Visit ANNOVAR Download Page
-	Fill in the registration form (free for academic use)
-	Download the latest version (annovar.latest.tar.gz)
+1. Register and download ANNOVAR from the ANNOVAR Download Page (free for academic use).
 
 2. Install ANNOVAR:
 ```
@@ -66,11 +68,58 @@ mkdir -p /path/to/software/annovar/humandb
 cp config/paths.yaml.template config/paths.yaml
 ```
 ##### Edit config/paths.yaml to set the correct paths for:
-	ANNOVAR installation directory
-	Reference files (genome FASTA, GFF3, etc.)
-	Other external tools
+- ANNOVAR installation directory
+- Reference files (genome FASTA, GFF3, etc.)
+- Other external tools
 
-### Step 6: Verify installation
+### Step 6: Download reference files from Figshare
+
+All required reference files for running PhyloSOLID with the hg38 genome build are publicly available on Figshare. 
+Figshare DOI: 10.6084/m9.figshare.31489249
+The Figshare repository contains the following six compressed (.gz) files:
+
+| File | Description | Size |
+|:-----|:------------|------:|
+| `genome.fa.gz` | hg38 reference genome | 840.4 MB |
+| `wgEncodeGencodeExonSupportV44.sort.bed.gz` | Exon coordinates for variant annotation | 51.07 MB |
+| `k24.umap.bedgraph.gz` | Mappability track for filtering (k-mer 24) | 2.57 GB |
+| `k100.umap.bedgraph.gz` | Mappability track for filtering (k-mer 100) | 718.29 MB |
+| `hg38_gnomad312_genome_only_af_all.txt.gz` | Population allele frequencies from gnomAD v3.1.2 | 4.65 GB |
+| `COMBINED_RADAR_REDIprotal_DARNED_hg38_all_sites.bed.gz` | Curated RNA editing sites | 58.26 MB |
+
+
+##### Download and Setup Instructions
+1. Download all six .gz files from Figshare using the DOI link: 10.6084/m9.figshare.31489249
+2. Place the downloaded files in a dedicated directory on your system (e.g., /path/to/reference/).
+3. Extract each file. You can do this one by one or with a simple loop in your terminal:
+```
+# Navigate to your reference directory
+cd /path/to/reference/
+
+# Extract all .gz files
+for file in *.gz; do
+    gunzip "$file"
+done
+```
+4. Configure the paths to the extracted files in your config/paths.yaml file.
+Example config/paths.yaml configuration:
+```
+# ANNOVAR configuration
+annovar:
+  script_dir: "/path/to/software/annovar"      # Directory containing annotate_variation.pl
+  humandb: "/path/to/software/annovar/humandb" # Directory with downloaded databases
+  build: "hg38"                                 # Genome build (hg38/hg19)
+
+# Reference files (paths to extracted files)
+reference:
+  genome_fasta: "/path/to/reference/genome.fa"                               # Extracted from genome.fa.gz
+  gff3_file: "/path/to/reference/wgEncodeGencodeExonSupportV44.sort.bed"    # Extracted from wgEncodeGencodeExonSupportV44.sort.bed.gz
+  mappability_file: "/path/to/reference/k24.umap.bedgraph"                  # Extracted from k24.umap.bedgraph.gz (use k100.umap.bedgraph if needed)
+  gnomad_file: "/path/to/reference/hg38_gnomad312_genome_only_af_all.txt"   # Extracted from hg38_gnomad312_genome_only_af_all.txt.gz
+  rna_editing_file: "/path/to/reference/COMBINED_RADAR_REDIprotal_DARNED_hg38_all_sites.bed" # Extracted from COMBINED_RADAR_REDIprotal_DARNED_hg38_all_sites.bed.gz
+  ```
+
+### Step 7: Verify installation
 ```
 # Check if ANNOVAR is properly configured
 phylosolid check-annovar --config config/paths.yaml
@@ -84,7 +133,7 @@ cd demo
 ### scRNA-seq mode
 ##### Basic usage:
 ```
-phylosolid scrna \
+phylosolid --workdir ./results scrna \
     --sample SAMPLE_ID \
     --mutation-list mutations.txt \
     --bam sample.bam \
@@ -92,13 +141,13 @@ phylosolid scrna \
 ```
 ##### With all options:
 ```
-phylosolid scrna \
+phylosolid --workdir ./results scrna \
     --sample SAMPLE_ID \
     --mutation-list mutations.txt \
     --bam sample.bam \
     --barcode barcodes.txt \
     --metadata metadata.txt \
-    --read-len 91 \
+    --read-len 100 \
     --cellnum 155 \
     --threads 8 \
     --running-type production \
@@ -109,48 +158,30 @@ phylosolid scrna \
 ### Running specific steps
 ```
 # Run only feature extraction
-phylosolid scrna --sample SAMPLE_ID ... --steps feature_extraction
+phylosolid --workdir ./results scrna --sample SAMPLE_ID ... --steps feature_extraction
 
 # Run only tree input generation
-phylosolid scrna --sample SAMPLE_ID ... --steps tree_input
+phylosolid --workdir ./results scrna --sample SAMPLE_ID ... --steps tree_input
 
 # Run only tree building
-phylosolid scrna --sample SAMPLE_ID ... --steps tree_building
+phylosolid --workdir ./results scrna --sample SAMPLE_ID ... --steps tree_building
 ```
 
 ### Parallel execution
 ##### Run feature extraction and tree input in parallel:
 ```
-phylosolid scrna --sample SAMPLE_ID ... --parallel
+phylosolid --workdir ./results scrna --sample SAMPLE_ID ... --parallel
 ```
 
 ### scDNA-seq mode
 ```
-phylosolid scdna \
+phylosolid --workdir ./results scdna \
     --sample SAMPLE_ID \
     --mutation-list mutations.txt \
     --bam sample.bam \
     --barcode barcodes.txt
 ```
 
-## Configuration
-### Paths configuration (config/paths.yaml)
-```
-# ANNOVAR configuration
-annovar:
-  script_dir: "/path/to/annovar"      # Directory containing annotate_variation.pl
-  humandb: "/path/to/annovar/humandb" # Directory with downloaded databases
-  build: "hg38"                        # Genome build (hg38/hg19)
-
-# Reference files
-reference:
-  genome_fasta: "/path/to/genome.fa"
-  gff3_file: "/path/to/wgEncodeGencodeExonSupportV44.sort.bed"
-  mappability_file: "/path/to/k24.umap.bedgraph"
-  gnomad_file: "/path/to/hg38_gnomad312_genome_only_af_all.txt"
-  rna_editing_file: "/path/to/COMBINED_RADAR_REDIprotal_DARNED_hg38_all_sites.bed"
-  run_get_prior: "/path/to/run_get_prior.py"
-```
 
 ## Input File Formats
 ### Mutation list (mutations.txt)
@@ -201,18 +232,64 @@ workdir/
 ```
 
 
-## Demo
-A complete demo with test data is available in the demo/ directory:
+## Demo Example
+
+A complete demo with test data is available in the demo/ directory. Below are example commands using the provided test data:
+
 ```
 cd demo
 ./run_demo.sh
 ```
 
-This will:
+##### Run individual steps with demo data
 
-1. Create test input files
-2. Run the full pipeline on test data
-3. Validate the output
+1. Feature extraction
+
+```
+python -m cli.main --workdir demo/expected_output scrna \
+    --sample Org4S15D63 \
+    --mutation-list demo/input/Org4S15D63/02_identifier/identifier.txt \
+    --bam demo/input/Org4S15D63/01_rawdata/Org4S15D63.bam \
+    --barcode demo/input/Org4S15D63/01_rawdata/Org4S15D63_CB.txt \
+    --threads 4 \
+    --read-len 100 \
+    --steps feature_extraction
+```
+
+2. Tree input generation
+```
+python -m cli.main --workdir demo/expected_output scrna \
+    --sample Org4S15D63 \
+    --mutation-list demo/input/Org4S15D63/02_identifier/identifier.txt \
+    --bam demo/input/Org4S15D63/01_rawdata/Org4S15D63.bam \
+    --barcode demo/input/Org4S15D63/01_rawdata/Org4S15D63_CB.txt \
+    --cellnum 155 \
+    --steps tree_input
+```
+
+3. Tree building
+```
+python -m cli.main --workdir demo/expected_output scrna \
+    --sample Org4S15D63 \
+    --mutation-list demo/input/Org4S15D63/02_identifier/identifier.txt \
+    --bam demo/input/Org4S15D63/01_rawdata/Org4S15D63.bam \
+    --barcode demo/input/Org4S15D63/01_rawdata/Org4S15D63_CB.txt \
+    --celltype-file demo/input/Org4S15D63/03_celltype/celltype_file_for_Org4S15D63.txt \
+    --steps tree_building
+```
+
+##### Complete pipeline with demo data
+```
+python -m cli.main --workdir demo/test_output scrna \
+    --sample Org4S15D63 \
+    --mutation-list demo/input/Org4S15D63/02_identifier/identifier.txt \
+    --bam demo/input/Org4S15D63/01_rawdata/Org4S15D63.bam \
+    --barcode demo/input/Org4S15D63/01_rawdata/Org10S4D46_CB.txt \
+    --threads 4 \
+    --read-len 100 \
+    --cellnum 155
+```
+
 
 ### Troubleshooting
 
@@ -222,6 +299,14 @@ If you see "ANNOVAR not found" error:
 1. Check that ANNOVAR is installed
 2. Verify the paths in config/paths.yaml
 3. Run phylosolid check-annovar to diagnose
+
+### Reference files not found
+If you see errors about missing reference files:
+
+1. Download the reference files package from Figshare using the DOI: 10.6084/m9.figshare.31489249
+2. Ensure files are extracted to the correct location
+3. Verify paths in config/paths.yaml point to the extracted files
+4. Check file permissions (ensure files are readable)
 
 ### Read length mismatch
 If you see warnings about read length:
@@ -245,7 +330,12 @@ chmod +x scripts/scrna/**/*.R
 
 If you use PhyloSOLID in your research, please cite:
 
-    1.Yang, Q. et al. PhyloSOLID: Robust phylogeny reconstruction from single-cell data despite inherent error and sparsity. (2026) doi:10.64898/2026.02.04.703905.
+    1. Yang, Q. et al. PhyloSOLID: Robust phylogeny reconstruction from single-cell data despite inherent error and sparsity. (2026) doi:10.64898/2026.02.04.703905.
+
+## Data Citation
+If you use the reference files from Figshare, please cite:
+
+    2. Yang, Q., Dou, Y. (2026). PhyloSOLID resources. Figshare. https://doi.org/10.6084/m9.figshare.31489249
 
 ## License
 
@@ -272,7 +362,9 @@ Please respect the licenses of these dependencies when using PhyloSOLID.
 
 ## Contact
 
-For questions and support, please contact: yangqing@westlake.edu.cn & yanmeidou@westlake.edu.cn
+For questions and support, please contact: 
+Qing Yang: yangqing@westlake.edu.cn
+Yanmei Dou: yanmeidou@westlake.edu.cn
 
 
 
